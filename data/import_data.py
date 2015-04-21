@@ -12,24 +12,25 @@ def import_events(clt, file_name):
     print "Importing data..."
     with open(file_name) as csvFile:
         reader = csv.DictReader(csvFile)
-        print(reader.fieldnames)
         reader.fieldnames[0] = 'timestamp'
 
         count = 0
         for row in reader:
             timestamp = row[reader.fieldnames[0]]
             for field in reader.fieldnames[1:]:
-                clt.create_event(
-                    event="$set",
-                    entity_type="energy_consumption",
-                    entity_id=str(count),
-                    properties={
-                        "circuit_id": int(field),
-                        "timestamp": int(timestamp),
-                        "energy_consumption": float(row[field])
-                    }
-                )
-                count += 1
+                if row[field] != '' and float(row[field]) >= 0:
+                    clt.create_event(
+                        event="$set",
+                        entity_type="energy_consumption",
+                        entity_id=str(count),
+                        properties={
+                            "circuit_id": int(field),
+                            "timestamp": int(timestamp),
+                            "energy_consumption": float(row[field])
+                        }
+                    )
+                    count += 1
+            print "%s events are imported." % count
     print "%s events are imported." % count
 
 
