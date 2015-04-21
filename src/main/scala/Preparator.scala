@@ -20,9 +20,9 @@ class Preparator extends PPreparator[TrainingData, PreparedData] {
     var dFeatures: List[Array[Double]] = List()
     var dLabels: List[Double] = List()
 
-    for (lb <- trainingData.labeledPoints.collect()) {
-      dFeatures = lb.features.toArray :: dFeatures
-      dLabels = lb.label :: dLabels
+    for (lb <- trainingData.data.collect()) {
+      dFeatures = Preparator.toFeaturesArray(lb.circuit_id, lb.timestamp) :: dFeatures
+      dLabels = lb.energy_consumption :: dLabels
     }
 
     logger.info(dFeatures.mkString(" "))
@@ -32,5 +32,11 @@ class Preparator extends PPreparator[TrainingData, PreparedData] {
     val dsLabels = Nd4j.create(dLabels.reverse.toArray).transpose()
     this.logger.info("END PREPARE-")
     new PreparedData(new DataSet(dsFeatures, dsLabels))
+  }
+}
+
+object Preparator {
+  def toFeaturesArray(circuit_id: Int, timestamp: Int): Array[Double] = {
+    Array[Double](circuit_id.toDouble, timestamp.toDouble)
   }
 }

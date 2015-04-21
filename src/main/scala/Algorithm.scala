@@ -69,7 +69,7 @@ class Model(
   @transient lazy val logger = Logger[this.type]
 
   def predict(query: Query): Double = {
-    val arr = Array[Double](query.circuit_id.toDouble, query.timestamp.toDouble)
+    val arr = Preparator.toFeaturesArray(query.circuit_id, query.timestamp)
     val features_array = Nd4j.create(arr)
     val pred = net.predict(features_array)(0)
     pred

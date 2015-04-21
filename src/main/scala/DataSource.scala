@@ -16,6 +16,12 @@ case class DataSourceParams(
   evalK: Option[Int]  // define the k-fold parameter.
 ) extends Params
 
+class ConsumptionEvent(
+  val circuit_id:         Int,
+  val timestamp:          Int,
+  val energy_consumption: Double
+) extends Serializable
+
 class DataSource(val dsp: DataSourceParams)
   extends PDataSource[TrainingData, EmptyEvaluationInfo, Query, ActualResult] {
 
@@ -24,7 +30,7 @@ class DataSource(val dsp: DataSourceParams)
   override
   def readTraining(sc: SparkContext): TrainingData = {
     val eventsDb = Storage.getPEvents()
-    val labeledPoints: RDD[LabeledPoint] = eventsDb.aggregateProperties(
+    val data: RDD[ConsumptionEvent] = eventsDb.aggregateProperties(
       appId = dsp.appId,
       entityType = "energy_consumption",
       // only keep entities with these required properties
@@ -33,12 +39,11 @@ class DataSource(val dsp: DataSourceParams)
       // entity ID and its aggregated properties
       .map { case (entityId, properties) =>
         try {
-          LabeledPoint(properties.get[Double]("energy_consumption"),
-            Vectors.dense(Array(
-              properties.get[Double]("circuit_id"),
-              properties.get[Double]("timestamp")
-            ))
-          )
+            new ConsumptionEvent(
+              properties.get[Int]("circuit_id"),
+              properties.get[Int]("timestamp"),
+              properties.get[Double]("energy_consumption")
+            )
         } catch {
           case e: Exception =>
             logger.error(s"Failed to get properties $properties of" +
@@ -47,9 +52,9 @@ class DataSource(val dsp: DataSourceParams)
         }
       }.cache()
 
-    logger.info(labeledPoints.collect().length.toString)
+    logger.info(data.collect().length.toString)
 
-    new TrainingData(labeledPoints)
+    new TrainingData(data)
   }
 
   /*override
@@ -108,5 +113,5 @@ class DataSource(val dsp: DataSourceParams)
 }
 
 class TrainingData(
-  val labeledPoints: RDD[LabeledPoint]
+  val data: RDD[ConsumptionEvent]
 ) extends Serializable
