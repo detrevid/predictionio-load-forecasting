@@ -26,18 +26,17 @@ class DataSource(val dsp: DataSourceParams)
     val eventsDb = Storage.getPEvents()
     val labeledPoints: RDD[LabeledPoint] = eventsDb.aggregateProperties(
       appId = dsp.appId,
-      entityType = "user",
-      // only keep entities with these required properties defined
-      required = Some(List("plan", "attr0", "attr1", "attr2")))(sc)
+      entityType = "energy_consumption",
+      // only keep entities with these required properties
+      required = Some(List("circuit_id", "timestamp", "energy_consumption")))(sc)
       // aggregateProperties() returns RDD pair of
       // entity ID and its aggregated properties
       .map { case (entityId, properties) =>
         try {
-          LabeledPoint(properties.get[Double]("plan"),
+          LabeledPoint(properties.get[Double]("energy_consumption"),
             Vectors.dense(Array(
-              properties.get[Double]("attr0"),
-              properties.get[Double]("attr1"),
-              properties.get[Double]("attr2")
+              properties.get[Double]("circuit_id"),
+              properties.get[Double]("timestamp")
             ))
           )
         } catch {
@@ -48,10 +47,12 @@ class DataSource(val dsp: DataSourceParams)
         }
       }.cache()
 
+    logger.info(labeledPoints.collect().length.toString)
+
     new TrainingData(labeledPoints)
   }
 
-  override
+  /*override
   def readEval(sc: SparkContext)
   : Seq[(TrainingData, EmptyEvaluationInfo, RDD[(Query, ActualResult)])] = {
     require(dsp.evalK.nonEmpty, "DataSourceParams.evalK must not be None")
@@ -99,11 +100,11 @@ class DataSource(val dsp: DataSourceParams)
         new TrainingData(trainingPoints),
         new EmptyEvaluationInfo(),
         testingPoints.map {
-          p => (new Query(p.features.toArray), new ActualResult(p.label.toString))
+          p => (new Query(p.features.toArray), new ActualResult(p.label))
         }
       )
     }
-  }
+  }*/
 }
 
 class TrainingData(

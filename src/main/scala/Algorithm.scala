@@ -32,7 +32,7 @@ class Algorithm(val ap: AlgorithmParams)
   @transient lazy val logger = Logger[this.type]
 
   def train(sc: SparkContext, data: PreparedData): Model = {
-
+    logger.info("ALGORITHM PHASE")
     Nd4j.MAX_SLICES_TO_PRINT = -1
     Nd4j.MAX_ELEMENTS_PER_SLICE = -1
     val conf: MultiLayerConfiguration =
@@ -40,38 +40,38 @@ class Algorithm(val ap: AlgorithmParams)
         .layerFactory(new PretrainLayerFactory(classOf[RBM])).weightInit(WeightInit.DISTRIBUTION)
         .dist(Nd4j.getDistributions.createNormal(0, 1)).activationFunction("tanh")
         .momentum(ap.momentum).dropOut(ap.dropOut)
-        .optimizationAlgo(OptimizationAlgorithm.LBFGS)
+        .optimizationAlgo(OptimizationAlgorithm.CONJUGATE_GRADIENT)
         .constrainGradientToUnitNorm(true).k(1).regularization(true)
         .l2(2e-4).visibleUnit(RBM.VisibleUnit.GAUSSIAN)
         .hiddenUnit(RBM.HiddenUnit.RECTIFIED)
         .lossFunction(LossFunctions.LossFunction.RMSE_XENT)
         .learningRate(ap.learningRate).iterationListener(new ScoreIterationListener(2))
-        .nIn(3).nOut(data.labels.length).list(ap.layers)
+        .nIn(2).nOut(1).list(ap.layers)
         .hiddenLayerSizes(ap.hiddenLayersSizes: _*).`override`(new ClassifierOverride(1)).build
 
     val d: MultiLayerNetwork = new MultiLayerNetwork(conf)
-
+    logger.info("BEFORE FIT")
     d.fit(data.dataSet)
 
-    new Model(data.labels, d)
+    new Model(d)
   }
 
   def predict(model: Model, query: Query): PredictedResult = {
-    val label : String = model.predict(query.features)
+    val label : Double = model.predict(query)
     new PredictedResult(label)
   }
 }
 
 class Model(
-    val labels: Array[String],
     val net: MultiLayerNetwork)
   extends Serializable {
 
   @transient lazy val logger = Logger[this.type]
 
-  def predict(features: Array[Double]): String = {
-    val features_array = Nd4j.create(features)
+  def predict(query: Query): Double = {
+    val arr = Array[Double](query.circuit_id.toDouble, query.timestamp.toDouble)
+    val features_array = Nd4j.create(arr)
     val pred = net.predict(features_array)(0)
-    labels(pred)
+    pred
   }
 }

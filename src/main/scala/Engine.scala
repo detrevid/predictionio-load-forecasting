@@ -4,15 +4,16 @@ import io.prediction.controller.EngineFactory
 import io.prediction.controller.Engine
 
 class Query(
-  val features: Array[Double]
+  val circuit_id: Int,
+  val timestamp: Int
 ) extends Serializable
 
 class PredictedResult(
-  val label: String
+  val label: Double
 ) extends Serializable
 
 class ActualResult(
-  val label: String
+  val label: Double
 ) extends Serializable
 
 object ClassificationEngine extends EngineFactory {
