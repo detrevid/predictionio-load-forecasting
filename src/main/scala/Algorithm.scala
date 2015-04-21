@@ -18,7 +18,7 @@ import org.nd4j.linalg.factory.Nd4j
 import org.nd4j.linalg.lossfunctions.LossFunctions
 
 case class AlgorithmParams(
-  iterations: Int = 10,
+  iterations: Int = 100,
   layers: Int = 2,
   hiddenLayersSizes: Seq[Int] = List(3),
   momentum: Double = 0.9,
@@ -46,7 +46,7 @@ class Algorithm(val ap: AlgorithmParams)
         .hiddenUnit(RBM.HiddenUnit.RECTIFIED)
         .lossFunction(LossFunctions.LossFunction.RMSE_XENT)
         .learningRate(ap.learningRate).iterationListener(new ScoreIterationListener(2))
-        .nIn(2).nOut(1).list(ap.layers)
+        .nIn(Preparator.getFeaturesArraySize).nOut(1).list(ap.layers)
         .hiddenLayerSizes(ap.hiddenLayersSizes: _*).`override`(new ClassifierOverride(1)).build
 
     val d: MultiLayerNetwork = new MultiLayerNetwork(conf)
@@ -62,15 +62,12 @@ class Algorithm(val ap: AlgorithmParams)
   }
 }
 
-class Model(
-    val net: MultiLayerNetwork)
-  extends Serializable {
+class Model(val net: MultiLayerNetwork) extends Serializable {
 
   @transient lazy val logger = Logger[this.type]
 
   def predict(query: Query): Double = {
-    val arr = Preparator.toFeaturesArray(query.circuit_id, query.timestamp)
-    val features_array = Nd4j.create(arr)
+    val features_array = Nd4j.create(Preparator.toFeaturesArray(query.circuit_id, query.timestamp))
     val pred = net.predict(features_array)(0)
     pred
   }
