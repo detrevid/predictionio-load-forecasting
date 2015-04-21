@@ -40,9 +40,9 @@ class DataSource(val dsp: DataSourceParams)
       .map { case (entityId, properties) =>
         try {
             new ConsumptionEvent(
-              properties.get[Int]("circuit_id"),
-              properties.get[Int]("timestamp"),
-              properties.get[Double]("energy_consumption")
+              circuit_id=properties.get[Int]("circuit_id"),
+              timestamp=properties.get[Int]("timestamp"),
+              energy_consumption=properties.get[Double]("energy_consumption")
             )
         } catch {
           case e: Exception =>

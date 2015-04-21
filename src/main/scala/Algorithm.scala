@@ -18,7 +18,7 @@ import org.nd4j.linalg.factory.Nd4j
 import org.nd4j.linalg.lossfunctions.LossFunctions
 
 case class AlgorithmParams(
-  iterations: Int = 100,
+  iterations: Int = 10,
   layers: Int = 2,
   hiddenLayersSizes: Seq[Int] = List(3),
   momentum: Double = 0.9,

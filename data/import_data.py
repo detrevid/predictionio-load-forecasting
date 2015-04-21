@@ -31,7 +31,7 @@ def import_events(clt, file_name):
                     )
                     count += 1
             print "%s events are imported." % count
-    print "%s events are imported." % count
+    print "ALL %s events are imported." % count
 
 
 if __name__ == '__main__':
