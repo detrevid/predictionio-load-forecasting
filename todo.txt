@@ -1,0 +1,5 @@
+rename package
+sanity check - remove checking from python file
+upgrade to pio 9.3 - stop using deprecated classes
+add uploading circuit metadata
+why parameters form engine.json are not used - and eh default are used insted
