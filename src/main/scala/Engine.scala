@@ -1,7 +1,6 @@
 package org.template.classification
 
-import io.prediction.controller.EngineFactory
-import io.prediction.controller.Engine
+import io.prediction.controller.{Engine, EngineFactory}
 
 class Query(
   val circuit_id: Int,
