@@ -2,3 +2,4 @@ rename package
 sanity check - remove checking from python file
 upgrade to pio 9.3 - stop using deprecated classes
 add uploading circuit metadata
+change query format - start using date instead of timestamps
