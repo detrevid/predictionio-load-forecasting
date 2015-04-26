@@ -60,7 +60,7 @@ object Preparator {
       (circle_data(hour, maxHour),
         circle_data(dayWeek, maxDayWeek),
         circle_data(dayMonth, maxDayMonth),
-        circle_data(hour * dayWeek, maxHour * maxDayWeek))
+        circle_data((hour + 1) * (dayWeek + 1) -1, maxHour * maxDayWeek))
 
     Array[Double](circuit_id,
       hourC._1, hourC._2,
