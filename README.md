@@ -1,8 +1,6 @@
-# PredictionIO-template-classification-dl4j
+# PredictionIO energy forecasting engine
 ## Overview
-A classification engine template that uses Deeplearning4j library.
 
-The template was based on [template-scala-parallel-classification](http://templates.prediction.io/PredictionIO/template-scala-parallel-classification).
 
 ##1. Install and run PredictionIO
 First you need to [install PredictionIO 0.9.1](http://docs.prediction.io/install/) (if you haven't done it).
@@ -25,15 +23,8 @@ You can check the status by running:
 pio status
 ```
 
-##2. Get the template
-
-```
-pio template get detrevid/template-classification-dl4j <YourEngineDir>
-cd <YourEngineDir>
-```
-
-##3. Set up deeplearning4j
-The template is using the current github version of [Deeplearning4j](https://github.com/deeplearning4j/deeplearning4j).
+##2. Set up deeplearning4j
+The project is currently using the current github version of [Deeplearning4j](https://github.com/deeplearning4j/deeplearning4j).
 
 ###Method 1: Quick Install
 There are 2 scripts provided with the template:
@@ -75,8 +66,8 @@ git pull
 ./setup.sh
 ```
 
-##4. Next steps
+##3. Next steps
 Follow [Quick Start - Classification Engine Template](http://docs.prediction.io/templates/classification/quickstart/) starting from the 3. subsection.
 
-##5. Learn more
+##4. Learn more
 You can learn more about Deeplearning4j studying [examples](https://github.com/deeplearning4j/dl4j-0.0.3.3-examples).
