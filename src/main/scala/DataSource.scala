@@ -3,14 +3,14 @@ package org.template.classification
 import io.prediction.controller.PDataSource
 import io.prediction.controller.EmptyEvaluationInfo
 import io.prediction.controller.Params
-import io.prediction.data.storage.Storage
+import io.prediction.data.store.PEventStore
 
 import grizzled.slf4j.Logger
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 
 case class DataSourceParams(
-  appId: Int,
+  appName: String,
   evalK: Option[Int]  // define the k-fold parameter.
 ) extends Params
 
@@ -27,9 +27,8 @@ class DataSource(val dsp: DataSourceParams)
 
   override
   def readTraining(sc: SparkContext): TrainingData = {
-    val eventsDb = Storage.getPEvents()
-    val data: RDD[ConsumptionEvent] = eventsDb.aggregateProperties(
-      appId = dsp.appId,
+    val data: RDD[ConsumptionEvent] = PEventStore.aggregateProperties(
+      appName = dsp.appName,
       entityType = "energy_consumption",
       // only keep entities with these required properties
       required = Some(List("circuit_id", "timestamp", "energy_consumption")))(sc)
