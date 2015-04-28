@@ -7,8 +7,6 @@ import io.prediction.data.storage.Storage
 
 import grizzled.slf4j.Logger
 import org.apache.spark.SparkContext
-import org.apache.spark.mllib.linalg.Vectors
-import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
 
 case class DataSourceParams(
@@ -18,7 +16,7 @@ case class DataSourceParams(
 
 class ConsumptionEvent(
   val circuit_id:         Int,
-  val timestamp:          Int,
+  val timestamp:          Long,
   val energy_consumption: Double
 ) extends Serializable
 
@@ -41,7 +39,7 @@ class DataSource(val dsp: DataSourceParams)
         try {
             new ConsumptionEvent(
               circuit_id=properties.get[Int]("circuit_id"),
-              timestamp=properties.get[Int]("timestamp"),
+              timestamp=properties.get[Long]("timestamp"),
               energy_consumption=properties.get[Double]("energy_consumption")
             )
         } catch {
@@ -52,7 +50,7 @@ class DataSource(val dsp: DataSourceParams)
         }
       }.cache()
 
-    logger.info(data.collect().length.toString)
+    //logger.info(data.collect().length.toString) //debug
 
     new TrainingData(data)
   }

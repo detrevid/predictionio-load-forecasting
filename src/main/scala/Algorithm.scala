@@ -5,25 +5,12 @@ import io.prediction.controller.Params
 
 import grizzled.slf4j.Logger
 import org.apache.spark.SparkContext
-import org.deeplearning4j.models.featuredetectors.rbm.RBM
-import org.deeplearning4j.nn.api.OptimizationAlgorithm
-import org.deeplearning4j.nn.conf.MultiLayerConfiguration
-import org.deeplearning4j.nn.conf.NeuralNetConfiguration
-import org.deeplearning4j.nn.conf.`override`.ClassifierOverride
-import org.deeplearning4j.nn.layers.factory.PretrainLayerFactory
-import org.deeplearning4j.nn.multilayer.MultiLayerNetwork
-import org.deeplearning4j.nn.weights.WeightInit
-import org.deeplearning4j.optimize.listeners.ScoreIterationListener
-import org.nd4j.linalg.factory.Nd4j
-import org.nd4j.linalg.lossfunctions.LossFunctions
+import org.apache.spark.mllib.regression.{LinearRegressionModel, LinearRegressionWithSGD}
 
 case class AlgorithmParams(
-  iterations: Int = 10,
-  layers: Int = 2,
-  hiddenLayersSizes: Seq[Int] = List(3),
-  momentum: Double = 0.9,
-  dropOut: Double = 0.8,
-  learningRate: Double = 0.3
+  iterations: Int = 10000,
+  stepSize:   Double = 0.1
+
 ) extends Params
 
 class Algorithm(val ap: AlgorithmParams)
@@ -32,28 +19,21 @@ class Algorithm(val ap: AlgorithmParams)
   @transient lazy val logger = Logger[this.type]
 
   def train(sc: SparkContext, data: PreparedData): Model = {
-    logger.info("ALGORITHM PHASE")
-    Nd4j.MAX_SLICES_TO_PRINT = -1
-    Nd4j.MAX_ELEMENTS_PER_SLICE = -1
-    val conf: MultiLayerConfiguration =
-      new NeuralNetConfiguration.Builder().iterations(ap.iterations)
-        .layerFactory(new PretrainLayerFactory(classOf[RBM])).weightInit(WeightInit.DISTRIBUTION)
-        .dist(Nd4j.getDistributions.createNormal(0, 1)).activationFunction("tanh")
-        .momentum(ap.momentum).dropOut(ap.dropOut)
-        .optimizationAlgo(OptimizationAlgorithm.CONJUGATE_GRADIENT)
-        .constrainGradientToUnitNorm(true).k(1).regularization(true)
-        .l2(2e-4).visibleUnit(RBM.VisibleUnit.GAUSSIAN)
-        .hiddenUnit(RBM.HiddenUnit.RECTIFIED)
-        .lossFunction(LossFunctions.LossFunction.RMSE_XENT)
-        .learningRate(ap.learningRate).iterationListener(new ScoreIterationListener(2))
-        .nIn(Preparator.getFeaturesArraySize).nOut(1).list(ap.layers)
-        .hiddenLayerSizes(ap.hiddenLayersSizes: _*).`override`(new ClassifierOverride(1)).build
+    //val mod: LinearRegressionModel = LinearRegressionWithSGD.train(data.data, ap.iterations)
+    require(data.data.take(1).nonEmpty,
+      s"RDD[labeldPoints] in PreparedData cannot be empty." +
+        " Please check if DataSource generates TrainingData" +
+        " and Preprator generates PreparedData correctly.")
 
-    val d: MultiLayerNetwork = new MultiLayerNetwork(conf)
-    logger.info("BEFORE FIT")
-    d.fit(data.dataSet)
+    val lin = new LinearRegressionWithSGD()
+    lin.setIntercept(true)
+    lin.optimizer
+      .setNumIterations(ap.iterations)
+      .setStepSize(ap.stepSize)
 
-    new Model(d)
+    new Model(lin.run(data.data))
+
+    //new Model(mod)
   }
 
   def predict(model: Model, query: Query): PredictedResult = {
@@ -62,13 +42,12 @@ class Algorithm(val ap: AlgorithmParams)
   }
 }
 
-class Model(val net: MultiLayerNetwork) extends Serializable {
+class Model(val mod: LinearRegressionModel) extends Serializable {
 
   @transient lazy val logger = Logger[this.type]
 
   def predict(query: Query): Double = {
-    val features_array = Nd4j.create(Preparator.toFeaturesArray(query.circuit_id, query.timestamp))
-    val pred = net.predict(features_array)(0)
-    pred
+    val features = Preparator.toFeaturesVector(query.circuit_id, query.timestamp)
+    mod.predict(features)
   }
 }

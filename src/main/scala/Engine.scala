@@ -4,7 +4,7 @@ import io.prediction.controller.{Engine, EngineFactory}
 
 class Query(
   val circuit_id: Int,
-  val timestamp: Int
+  val timestamp: Long
 ) extends Serializable
 
 class PredictedResult(

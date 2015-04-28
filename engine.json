@@ -4,19 +4,15 @@
   "engineFactory": "org.template.classification.ClassificationEngine",
   "datasource": {
     "params": {
-      "appId": 10
+      "appId": 11
     }
   },
   "algorithms": [
     {
       "name": "alg",
       "params": {
-        "iterations": 150,
-        "layers": 2,
-        "hiddenLayersSizes": [4],
-        "momentum": 0.8,
-        "dropOut": 0.9,
-        "learningRate": 0.5
+        "iterations": 10000,
+        "stepSize":   0.1
       }
     }
   ]
