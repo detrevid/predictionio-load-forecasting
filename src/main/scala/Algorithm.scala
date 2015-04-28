@@ -1,4 +1,4 @@
-package org.template.classification
+package detrevid.predictionio.energyforecasting
 
 import io.prediction.controller.P2LAlgorithm
 import io.prediction.controller.Params
@@ -8,9 +8,8 @@ import org.apache.spark.SparkContext
 import org.apache.spark.mllib.regression.{LinearRegressionModel, LinearRegressionWithSGD}
 
 case class AlgorithmParams(
-  iterations: Int = 10000,
+  iterations: Int    = 10000,
   stepSize:   Double = 0.1
-
 ) extends Params
 
 class Algorithm(val ap: AlgorithmParams)
@@ -19,11 +18,10 @@ class Algorithm(val ap: AlgorithmParams)
   @transient lazy val logger = Logger[this.type]
 
   def train(sc: SparkContext, data: PreparedData): Model = {
-    //val mod: LinearRegressionModel = LinearRegressionWithSGD.train(data.data, ap.iterations)
     require(data.data.take(1).nonEmpty,
-      s"RDD[labeldPoints] in PreparedData cannot be empty." +
+      s"RDD[labeledPoints] in PreparedData cannot be empty." +
         " Please check if DataSource generates TrainingData" +
-        " and Preprator generates PreparedData correctly.")
+        " and Preparator generates PreparedData correctly.")
 
     val lin = new LinearRegressionWithSGD()
     lin.setIntercept(true)
@@ -32,8 +30,6 @@ class Algorithm(val ap: AlgorithmParams)
       .setStepSize(ap.stepSize)
 
     new Model(lin.run(data.data))
-
-    //new Model(mod)
   }
 
   def predict(model: Model, query: Query): PredictedResult = {

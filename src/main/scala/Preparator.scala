@@ -1,4 +1,4 @@
-package org.template.classification
+package detrevid.predictionio.energyforecasting
 
 import io.prediction.controller.PPreparator
 
@@ -22,7 +22,8 @@ class Preparator extends PPreparator[TrainingData, PreparedData] {
 
   def prepare(sc: SparkContext, trainingData: TrainingData): PreparedData = {
     new PreparedData(trainingData.data map {p =>
-      LabeledPoint(p.energy_consumption, Preparator.toFeaturesVector(p.circuit_id, p.timestamp))
+      LabeledPoint(p.energy_consumption,
+        Preparator.toFeaturesVector(p.circuit_id, p.timestamp))
     })
   }
 }
@@ -35,7 +36,8 @@ object Preparator {
     toFeaturesVector(circuit_id, timestamp, dummyCoding)
   }
 
-  def toFeaturesVector(circuit_id: Int, timestamp: Long, coding: (Int, Int) => Array[Double]): Vector = {
+  def toFeaturesVector(circuit_id: Int, timestamp: Long,
+                       coding: (Int, Int) => Array[Double]): Vector = {
     val cal = Calendar.getInstance()
     cal.setTimeInMillis(timestamp * 1000)
     val (maxHour, maxDayWeek, maxDayMonth, maxMonth) = (23, 6, 30, 11)

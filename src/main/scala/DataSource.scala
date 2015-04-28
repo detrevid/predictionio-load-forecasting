@@ -1,4 +1,4 @@
-package org.template.classification
+package detrevid.predictionio.energyforecasting
 
 import io.prediction.controller.PDataSource
 import io.prediction.controller.EmptyEvaluationInfo
@@ -48,8 +48,6 @@ class DataSource(val dsp: DataSourceParams)
             throw e
         }
       }.cache()
-
-    //logger.info(data.collect().length.toString) //debug
 
     new TrainingData(data)
   }

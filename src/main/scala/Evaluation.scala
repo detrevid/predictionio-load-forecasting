@@ -1,4 +1,4 @@
-package org.template.classification
+package detrevid.predictionio.energyforecasting
 
 import io.prediction.controller.AverageMetric
 import io.prediction.controller.EmptyEvaluationInfo

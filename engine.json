@@ -1,7 +1,7 @@
 {
   "id": "default",
   "description": "Default settings",
-  "engineFactory": "org.template.classification.ClassificationEngine",
+  "engineFactory": "detrevid.predictionio.energyforecasting.ClassificationEngine",
   "datasource": {
     "params": {
       "appName": "MyApp10"
