@@ -6,32 +6,55 @@ import io.prediction.controller.EngineParams
 import io.prediction.controller.EngineParamsGenerator
 import io.prediction.controller.Evaluation
 
-case class Precision()
-  extends AverageMetric[EmptyEvaluationInfo, 
-      Query, PredictedResult, ActualResult] {
-  def calculate(query: Query, predicted: PredictedResult, actual: ActualResult)
-  : Double = if (predicted.label == actual.label) 1.0 else 0.0
+import org.apache.spark.SparkContext
+import org.apache.spark.rdd.RDD
+
+import math.{pow, sqrt}
+
+case class RMSEMetric()
+  extends AverageMetric[EmptyEvaluationInfo, Query, PredictedResult, ActualResult] {
+
+  override
+  def calculate(sc: SparkContext,
+                evalDataSet: Seq[(EmptyEvaluationInfo,
+                  RDD[(Query, PredictedResult, ActualResult)])]): Double = {
+    sqrt(super.calculate(sc, evalDataSet))
+  }
+
+  def calculate(query: Query, predicted: PredictedResult, actual: ActualResult): Double =
+    pow(predicted.label - actual.label, 2)
+
+  override
+  def compare(r0: Double, r1: Double): scala.Int = {
+    -1 * super.compare(r0, r1)
+  }
 }
 
-object PrecisionEvaluation extends Evaluation {
-  // Define Engine and Metric used in Evaluation
-  engineMetric = (ClassificationEngine(), new Precision())
+object RMSEEvaluation extends Evaluation {
+  engineMetric = (ForecastingEngine(), new RMSEMetric())
 }
 
 object EngineParamsList extends EngineParamsGenerator {
-  // Define list of EngineParams used in Evaluation
 
-  // First, we define the base engine params. It specifies the appId from which
-  // the data is read, and a evalK parameter is used to define the
-  // cross-validation.
   private[this] val baseEP = EngineParams(
-    dataSourceParams = DataSourceParams(appName = "INVALID APP NAME", evalK = Some(5)))
+    dataSourceParams = DataSourceParams(appName = "EnergyForecaster", evalK = Some(5)))
 
-  // Second, we specify the engine params list by explicitly listing all
-  // algorithm parameters. In this case, we evaluate 3 engine params, each with
-  // a different algorithm params value.
   engineParamsList = Seq(
-    baseEP.copy(algorithmParamsList = Seq(("alg", AlgorithmParams()))),
-    baseEP.copy(algorithmParamsList = Seq(("alg", AlgorithmParams()))),
-    baseEP.copy(algorithmParamsList = Seq(("alg", AlgorithmParams()))))
+    baseEP.copy(
+      algorithmParamsList = Seq(
+        ("alg", AlgorithmParams(iterations = 100, stepSize = 0.01))
+      )),
+    baseEP.copy(
+      algorithmParamsList = Seq(
+        ("alg", AlgorithmParams(iterations = 100, stepSize = 0.1))
+      )),
+    baseEP.copy(
+      algorithmParamsList = Seq(
+        ("alg", AlgorithmParams(iterations = 1000, stepSize = 0.01))
+      )),
+    baseEP.copy(
+      algorithmParamsList = Seq(
+        ("alg", AlgorithmParams(iterations = 1000, stepSize = 0.1))
+      ))
+  )
 }
