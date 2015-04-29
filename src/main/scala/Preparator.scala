@@ -21,10 +21,11 @@ class Preparator extends PPreparator[TrainingData, PreparedData] {
   @transient lazy val logger = Logger[this.type]
 
   def prepare(sc: SparkContext, trainingData: TrainingData): PreparedData = {
-    new PreparedData(trainingData.data map {p =>
+    val data = trainingData.data map {p =>
       LabeledPoint(p.energy_consumption,
         Preparator.toFeaturesVector(p.circuit_id, p.timestamp))
-    })
+    }
+    new PreparedData(data.cache())
   }
 }
 
