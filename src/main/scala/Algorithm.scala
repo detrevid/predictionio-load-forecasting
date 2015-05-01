@@ -9,6 +9,7 @@ import org.apache.spark.mllib.regression.{LinearRegressionModel, LinearRegressio
 
 case class AlgorithmParams(
   iterations: Int    = 10000,
+  regParam:   Double = 0.0,
   stepSize:   Double = 0.1
 ) extends Params
 
@@ -27,6 +28,7 @@ class Algorithm(val ap: AlgorithmParams)
     lin.setIntercept(true)
     lin.optimizer
       .setNumIterations(ap.iterations)
+      .setRegParam(ap.regParam)
       .setStepSize(ap.stepSize)
 
     new Model(lin.run(data.data))
