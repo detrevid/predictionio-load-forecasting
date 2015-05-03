@@ -1,4 +1,0 @@
-add uploading circuit metadata
-change query format - start using date instead of timestamps
-fix  Failed to load implementation from: com.github.fommil.netlib.NativeSystemBLAS
-think about some shuffle before k-fold splitting
