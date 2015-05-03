@@ -3,6 +3,7 @@ package detrevid.predictionio.energyforecasting
 import io.prediction.controller.PDataSource
 import io.prediction.controller.EmptyEvaluationInfo
 import io.prediction.controller.Params
+import io.prediction.controller.SanityCheck
 import io.prediction.data.store.PEventStore
 
 import grizzled.slf4j.Logger
@@ -83,4 +84,9 @@ class DataSource(val dsp: DataSourceParams)
 
 class TrainingData(
   val data: RDD[ConsumptionEvent]
-) extends Serializable
+) extends Serializable with SanityCheck {
+
+  override def sanityCheck(): Unit = {
+    require(data.take(1).nonEmpty, s"data cannot be empty!")
+  }
+}

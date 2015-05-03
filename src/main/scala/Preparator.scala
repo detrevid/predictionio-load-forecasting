@@ -1,6 +1,7 @@
 package detrevid.predictionio.energyforecasting
 
 import io.prediction.controller.PPreparator
+import io.prediction.controller.SanityCheck
 
 import grizzled.slf4j.Logger
 import org.apache.spark.SparkContext
@@ -12,9 +13,14 @@ import math.{cos, Pi, sin}
 
 import java.util.Calendar
 
-class PreparedData(
+class PreparedData (
   val data: RDD[LabeledPoint]
-) extends Serializable
+) extends Serializable with SanityCheck {
+
+  override def sanityCheck(): Unit = {
+    require(data.take(1).nonEmpty, s"data cannot be empty!")
+  }
+}
 
 class Preparator extends PPreparator[TrainingData, PreparedData] {
 

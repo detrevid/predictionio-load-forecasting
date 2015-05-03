@@ -19,11 +19,6 @@ class Algorithm(val ap: AlgorithmParams)
   @transient lazy val logger = Logger[this.type]
 
   def train(sc: SparkContext, data: PreparedData): Model = {
-    require(data.data.take(1).nonEmpty,
-      s"RDD[labeledPoints] in PreparedData cannot be empty." +
-        " Please check if DataSource generates TrainingData" +
-        " and Preparator generates PreparedData correctly.")
-
     val lin = new LinearRegressionWithSGD()
     lin.setIntercept(true)
     lin.optimizer
