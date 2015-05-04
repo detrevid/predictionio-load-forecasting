@@ -11,7 +11,7 @@ import org.apache.spark.rdd.RDD
 
 import math.{cos, Pi, sin}
 
-import java.util.Calendar
+import java.util.{Calendar, TimeZone}
 
 class PreparedData (
   val data: RDD[LabeledPoint]
@@ -27,7 +27,7 @@ class Preparator extends PPreparator[TrainingData, PreparedData] {
   @transient lazy val logger = Logger[this.type]
 
   def prepare(sc: SparkContext, trainingData: TrainingData): PreparedData = {
-    val data = trainingData.data map {p =>
+    val data = trainingData.data map { p =>
       LabeledPoint(p.energy_consumption,
         Preparator.toFeaturesVector(p.circuit_id, p.timestamp))
     }
@@ -38,6 +38,16 @@ class Preparator extends PPreparator[TrainingData, PreparedData] {
 object Preparator {
 
   @transient lazy val logger = Logger[this.type]
+  @transient lazy val timeZone = TimeZone.getTimeZone("America/Los_Angeles")
+
+  def getLocalTime(timestamp: Long, timeZone: TimeZone): Calendar = {
+    val timeInMs: Long = timestamp * 1000
+    val cal = Calendar.getInstance()
+    val utcTimeInMs: Long = timeInMs - cal.getTimeZone.getOffset(timeInMs)
+    val localTimeInMs: Long = utcTimeInMs + timeZone.getOffset(utcTimeInMs)
+    cal.setTimeInMillis(localTimeInMs)
+    cal
+  }
 
   def toFeaturesVector(circuit_id: Int, timestamp: Long): Vector = {
     toFeaturesVector(circuit_id, timestamp, dummyCoding)
@@ -45,8 +55,8 @@ object Preparator {
 
   def toFeaturesVector(circuit_id: Int, timestamp: Long,
                        coding: (Int, Int) => Array[Double]): Vector = {
-    val cal = Calendar.getInstance()
-    cal.setTimeInMillis(timestamp * 1000)
+    val cal = getLocalTime(timestamp, timeZone)
+
     val (maxHour, maxDayWeek, maxDayMonth, maxMonth) = (23, 6, 30, 11)
     val (hour, dayWeek, dayMonth, month) =
       (cal.get(Calendar.HOUR_OF_DAY),

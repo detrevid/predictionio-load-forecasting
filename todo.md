@@ -9,7 +9,6 @@
 - [ ] add mean normalization
 - [ ] add scaling
 - [ ] add training on every circuit separately (+ training in groups by metadata)
-- [ ] add support for timezones
 
 # Future
 - [ ] read timezones from circuit zip code
