@@ -14,7 +14,8 @@ import math.{cos, Pi, sin}
 import java.util.{Calendar, TimeZone}
 
 class PreparedData (
-  val data: RDD[LabeledPoint]
+  val circuitsIds: Array[Int],
+  val data: RDD[(Int, LabeledPoint)]
 ) extends Serializable with SanityCheck {
 
   override def sanityCheck(): Unit = {
@@ -27,11 +28,14 @@ class Preparator extends PPreparator[TrainingData, PreparedData] {
   @transient lazy val logger = Logger[this.type]
 
   def prepare(sc: SparkContext, trainingData: TrainingData): PreparedData = {
-    val data = trainingData.data map { p =>
-      LabeledPoint(p.energy_consumption,
-        Preparator.toFeaturesVector(p.circuit_id, p.timestamp))
-    }
-    new PreparedData(data.cache())
+    val circuitsIds = trainingData.data map { _.circuit_id } distinct() collect()
+
+    val data = trainingData.data map {
+      ev => (ev.circuit_id, LabeledPoint(ev.energy_consumption,
+        Preparator.toFeaturesVector(ev.circuit_id, ev.timestamp)))
+    } cache()
+
+    new PreparedData(circuitsIds, data)
   }
 }
 

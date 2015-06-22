@@ -26,7 +26,13 @@ class Algorithm(val ap: AlgorithmParams)
       .setRegParam(ap.regParam)
       .setStepSize(ap.stepSize)
 
-    new Model(lin.run(data.data))
+    val mod: Map[Int, LinearRegressionModel] = (data.circuitsIds map {
+      cid =>
+        val circuitData = data.data filter {_._1 == cid} map {_._2} cache()
+        (cid, lin.run(circuitData))
+    }).toMap
+
+    new Model(mod)
   }
 
   def predict(model: Model, query: Query): PredictedResult = {
@@ -35,12 +41,12 @@ class Algorithm(val ap: AlgorithmParams)
   }
 }
 
-class Model(val mod: LinearRegressionModel) extends Serializable {
+class Model(val mod: Map[Int, LinearRegressionModel]) extends Serializable {
 
   @transient lazy val logger = Logger[this.type]
 
   def predict(query: Query): Double = {
     val features = Preparator.toFeaturesVector(query.circuit_id, query.timestamp)
-    mod.predict(features)
+    mod(query.circuit_id).predict(features)
   }
 }
