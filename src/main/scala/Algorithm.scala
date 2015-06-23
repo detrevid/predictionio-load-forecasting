@@ -8,9 +8,10 @@ import org.apache.spark.SparkContext
 import org.apache.spark.mllib.regression.{LinearRegressionModel, LinearRegressionWithSGD}
 
 case class AlgorithmParams(
-  iterations: Int    = 10000,
-  regParam:   Double = 0.0,
-  stepSize:   Double = 0.1
+  iterations:        Int    = 10000,
+  regParam:          Double = 0.0,
+  miniBatchFraction: Double = 1.0, 
+  stepSize:          Double = 0.1
 ) extends Params
 
 class Algorithm(val ap: AlgorithmParams)
@@ -24,6 +25,7 @@ class Algorithm(val ap: AlgorithmParams)
     lin.optimizer
       .setNumIterations(ap.iterations)
       .setRegParam(ap.regParam)
+      .setMiniBatchFraction(ap.miniBatchFraction)
       .setStepSize(ap.stepSize)
 
     val mod: Map[Int, LinearRegressionModel] = (data.circuitsIds map {
