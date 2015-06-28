@@ -1,4 +1,4 @@
-package detrevid.predictionio.energyforecasting
+package detrevid.predictionio.loadforecasting
 
 import io.prediction.controller.P2LAlgorithm
 import io.prediction.controller.Params

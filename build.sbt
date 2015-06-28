@@ -2,7 +2,7 @@ import AssemblyKeys._
 
 assemblySettings
 
-name := "predictionio-energy-forecasting"
+name := "predictionio-load-forecasting"
 
 libraryDependencies ++= Seq(
   "io.prediction"     %% "core"         % pioVersion.value  % "provided",

@@ -1,7 +1,7 @@
 {
   "id": "default",
   "description": "Default settings",
-  "engineFactory": "detrevid.predictionio.energyforecasting.ForecastingEngine",
+  "engineFactory": "detrevid.predictionio.loadforecasting.ForecastingEngine",
   "datasource": {
     "params": {
       "appName": "EnergyForecaster"

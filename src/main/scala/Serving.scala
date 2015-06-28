@@ -1,4 +1,4 @@
-package detrevid.predictionio.energyforecasting
+package detrevid.predictionio.loadforecasting
 
 import io.prediction.controller.LServing
 

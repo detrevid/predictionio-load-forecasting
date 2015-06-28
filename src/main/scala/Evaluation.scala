@@ -1,4 +1,4 @@
-package detrevid.predictionio.energyforecasting
+package detrevid.predictionio.loadforecasting
 
 import io.prediction.controller.AverageMetric
 import io.prediction.controller.EmptyEvaluationInfo
@@ -58,3 +58,4 @@ object EngineParamsList extends EngineParamsGenerator {
       ))
   )
 }
+
