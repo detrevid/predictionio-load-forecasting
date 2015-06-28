@@ -3,7 +3,7 @@ package detrevid.predictionio.loadforecasting
 import io.prediction.controller.{Engine, EngineFactory}
 
 class Query(
-  val circuit_id: Int,
+  val circuitId: Int,
   val timestamp: Long
 ) extends Serializable
 

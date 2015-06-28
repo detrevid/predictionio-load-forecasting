@@ -16,9 +16,9 @@ case class DataSourceParams(
 ) extends Params
 
 class ConsumptionEvent(
-  val circuit_id:         Int,
+  val circuitId:         Int,
   val timestamp:          Long,
-  val energy_consumption: Double
+  val energyConsumption: Double
 ) extends Serializable
 
 class DataSource(val dsp: DataSourceParams)
@@ -37,9 +37,9 @@ class DataSource(val dsp: DataSourceParams)
       .map { case (entityId, properties) =>
       try {
         new ConsumptionEvent(
-          circuit_id=properties.get[Int]("circuit_id"),
+          circuitId=properties.get[Int]("circuit_id"),
           timestamp=properties.get[Long]("timestamp"),
-          energy_consumption=properties.get[Double]("energy_consumption")
+          energyConsumption=properties.get[Double]("energy_consumption")
         )
       } catch {
         case e: Exception =>
@@ -75,7 +75,7 @@ class DataSource(val dsp: DataSourceParams)
         new TrainingData(trainingPoints),
         new EmptyEvaluationInfo(),
         testingPoints.map {
-          p => (new Query(p.circuit_id, p.timestamp), new ActualResult(p.energy_consumption))
+          p => (new Query(p.circuitId, p.timestamp), new ActualResult(p.energyConsumption))
         }
         )
     }
@@ -90,3 +90,4 @@ class TrainingData(
     require(data.take(1).nonEmpty, s"data cannot be empty!")
   }
 }
+

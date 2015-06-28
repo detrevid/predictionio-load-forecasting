@@ -48,7 +48,8 @@ class Model(val mod: Map[Int, LinearRegressionModel]) extends Serializable {
   @transient lazy val logger = Logger[this.type]
 
   def predict(query: Query): Double = {
-    val features = Preparator.toFeaturesVector(query.circuit_id, query.timestamp)
-    mod(query.circuit_id).predict(features)
+    val features = Preparator.toFeaturesVector(query.circuitId, query.timestamp)
+    mod(query.circuitId).predict(features)
   }
 }
+
